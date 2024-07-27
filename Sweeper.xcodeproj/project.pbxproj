@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1C01AF8D2C507EB8008F2750 /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C01AF8C2C507EB8008F2750 /* BluetoothManager.swift */; };
+		1C01AF8F2C5485F8008F2750 /* DeviceLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C01AF8E2C5485F8008F2750 /* DeviceLocationView.swift */; };
+		1C01AF912C548636008F2750 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C01AF902C548636008F2750 /* Device.swift */; };
 		1CF279072C504E2C00977A26 /* SweeperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CF279062C504E2C00977A26 /* SweeperApp.swift */; };
 		1CF279092C504E2C00977A26 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CF279082C504E2C00977A26 /* HomeView.swift */; };
 		1CF2790B2C504E2F00977A26 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1CF2790A2C504E2F00977A26 /* Assets.xcassets */; };
@@ -36,6 +38,8 @@
 
 /* Begin PBXFileReference section */
 		1C01AF8C2C507EB8008F2750 /* BluetoothManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothManager.swift; sourceTree = "<group>"; };
+		1C01AF8E2C5485F8008F2750 /* DeviceLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceLocationView.swift; sourceTree = "<group>"; };
+		1C01AF902C548636008F2750 /* Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
 		1CF279032C504E2C00977A26 /* Sweeper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sweeper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1CF279062C504E2C00977A26 /* SweeperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SweeperApp.swift; sourceTree = "<group>"; };
 		1CF279082C504E2C00977A26 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -101,6 +105,8 @@
 				1CF2790A2C504E2F00977A26 /* Assets.xcassets */,
 				1CF2790C2C504E2F00977A26 /* Preview Content */,
 				1C01AF8C2C507EB8008F2750 /* BluetoothManager.swift */,
+				1C01AF8E2C5485F8008F2750 /* DeviceLocationView.swift */,
+				1C01AF902C548636008F2750 /* Device.swift */,
 			);
 			path = Sweeper;
 			sourceTree = "<group>";
@@ -263,6 +269,8 @@
 				1CF279092C504E2C00977A26 /* HomeView.swift in Sources */,
 				1C01AF8D2C507EB8008F2750 /* BluetoothManager.swift in Sources */,
 				1CF279072C504E2C00977A26 /* SweeperApp.swift in Sources */,
+				1C01AF8F2C5485F8008F2750 /* DeviceLocationView.swift in Sources */,
+				1C01AF912C548636008F2750 /* Device.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -431,6 +439,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This is for basic functionality of the app.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This is for basic functionality of the app.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "This is for basic functionality of the app.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This is important.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -462,6 +472,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This is for basic functionality of the app.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This is for basic functionality of the app.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "This is for basic functionality of the app.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This is important.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
