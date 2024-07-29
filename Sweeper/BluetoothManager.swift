@@ -26,6 +26,7 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
     private var scanTimer: Timer!
     
     private var currentScanIndex: Int = 0
+    var lastDeviceLocated: Device?
     var deviceToBeLocated: Device?
     
     override init() {

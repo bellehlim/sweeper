@@ -10,6 +10,7 @@ import SwiftUI
 struct DeviceLocationView: View {
     @ObservedObject var device: Device
     @ObservedObject var bluetoothManager: BluetoothManager
+    @Binding var showAlert: Bool
     
     let maxSize = 400.0
     let minSize = 30.0
@@ -22,10 +23,10 @@ struct DeviceLocationView: View {
         let clampedInput = max(min(calculateDistance(), maxDistance), minDistance)
         let normalizedInput = (clampedInput - minDistance) / (maxDistance - minDistance)
         let clampedNormalizedInput = max(min(normalizedInput, 1), 0)
-
+        
         // Apply a logarithmic scale to make smaller changes more sensitive at the lower end
         let logScale = log10(clampedNormalizedInput * 9 + 1)
-
+        
         let circleWidth = minSize + CGFloat(logScale) * (maxSize - minSize) / log10(10)
         return circleWidth
     }
@@ -78,7 +79,12 @@ struct DeviceLocationView: View {
             bluetoothManager.deviceToBeLocated = device
         }
         .onDisappear() {
+            bluetoothManager.lastDeviceLocated = device
             bluetoothManager.deviceToBeLocated = nil
+
+            guard let uuid = bluetoothManager.lastDeviceLocated?.peripheral.identifier else { return }
+            showAlert = bluetoothManager.cachedPeripherals[uuid] == nil
         }
+        
     }
 }

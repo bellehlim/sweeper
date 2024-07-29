@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct HomeView: View {
+    
     @ObservedObject var bluetoothManager = BluetoothManager()
+    @Environment(\.presentationMode) var presentationMode
+    @State private var showAlert: Bool = false
     
     var body: some View {
         NavigationView {
@@ -26,7 +29,9 @@ struct HomeView: View {
                     bluetoothManager.sortedDevices,
                     id: \.id
                 ) { device in
-                    NavigationLink(destination: DeviceLocationView(device: device, bluetoothManager: bluetoothManager)) {
+                    NavigationLink(destination: DeviceLocationView(device: device, 
+                                                                   bluetoothManager: bluetoothManager,
+                                                                   showAlert: $showAlert)) {
                         HStack {
                             Text(device.name)
                             Spacer()
@@ -48,6 +53,15 @@ struct HomeView: View {
         }.onAppear {
             // first scan
             bluetoothManager.startScanning()
+        }
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text("Device No Longer in Range"),
+                message: Text("\(bluetoothManager.lastDeviceLocated?.name ?? "The device you were viewing") is no longer in range."),
+                dismissButton: .default(Text("OK")) {
+                    presentationMode.wrappedValue.dismiss()
+                }
+            )
         }
     }
 }
