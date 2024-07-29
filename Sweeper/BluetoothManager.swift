@@ -10,11 +10,23 @@ import CoreLocation
 
 class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
     
-    @Published var discoveredPeripherals = [Device]()
-    private var cachedPeripherals = [UUID: Device]()
+    @Published var cachedPeripherals = [UUID: Device]() {
+        didSet {
+            updateSortedDevices()
+        }
+    }
     
+    @Published var sortedDevices: [Device] = []
+    
+    private func updateSortedDevices() {
+        sortedDevices = cachedPeripherals.values.sorted {
+            ($0.rssi ?? Int.min) > ($1.rssi ?? Int.min)
+        }
+    }
     private var centralManager: CBCentralManager!
     private var scanTimer: Timer?
+    
+    private var currentScanIndex: Int = 0
     
     override init() {
         super.init()
@@ -23,6 +35,7 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
         scanTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             guard let self else { return }
             self.scanForPeripherals()
+            currentScanIndex += 1
         }
     }
     
@@ -30,10 +43,8 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
         scanTimer?.invalidate()
     }
     
+    
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        if central.state == .poweredOn {
-            scanForPeripherals()
-        }
     }
     
     private func scanForPeripherals() {
@@ -48,22 +59,29 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
         } else {
             let newDevice = createDevice(from: peripheral, RSSI: RSSI, advertisementData: advertisementData)
             cachedPeripherals[peripheral.identifier] = newDevice
-            discoveredPeripherals.append(newDevice)
+        }
+        // remove stale peripherals
+        for (uuid, device) in cachedPeripherals {
+            if device.mostRecentScan + 2 < currentScanIndex {
+                cachedPeripherals.removeValue(forKey: uuid)
+            }
         }
     }
     
     private func updateDevice(_ device: Device, with RSSI: NSNumber, advertisementData: [String: Any]) {
         device.lastRssi = device.rssi
         device.rssi = RSSI.intValue
+        device.mostRecentScan = currentScanIndex
     }
     
     private func createDevice(from peripheral: CBPeripheral, RSSI: NSNumber, advertisementData: [String: Any]) -> Device {
         let newDevice = Device(
-            name: peripheral.name ?? String("Unknown \(discoveredPeripherals.count)"),
+            name: peripheral.name ?? String("Unknown"),
             rssi: RSSI.intValue,
             lastRssi: RSSI.intValue,
             txPower: advertisementData[CBAdvertisementDataTxPowerLevelKey] as? Int ?? -59,
-            peripheral: peripheral
+            peripheral: peripheral,
+            mostRecentScan: currentScanIndex
         )
         return newDevice
     }

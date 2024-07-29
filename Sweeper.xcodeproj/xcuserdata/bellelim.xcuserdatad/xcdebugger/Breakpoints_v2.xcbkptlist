@@ -7,16 +7,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "11F4B90C-4BF3-4EB7-AFD6-616AD899B936"
+            uuid = "6CF81313-C9F6-46A4-9A5B-02748F8DCC87"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Sweeper/Views/DeviceLocationView.swift"
+            filePath = "Sweeper/BluetoothManager.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "39"
-            endingLineNumber = "39"
-            landmarkName = "calculateDistance()"
+            startingLineNumber = "37"
+            endingLineNumber = "37"
+            landmarkName = "init()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

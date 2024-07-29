@@ -17,16 +17,13 @@ struct HomeView: View {
                     .fill(Color.blue) // Adjust the color as needed
                     .frame(height: 100)
                     .overlay(
-                        Text("Devices in Range: \(bluetoothManager.discoveredPeripherals.count)")
+                        Text("Devices in Range: \(bluetoothManager.sortedDevices.count)")
                             .foregroundColor(.white)
                             .font(.headline)
-                            .padding()
                     )
-                Spacer()
+                    .padding(.vertical, 10)
                 List(
-                    bluetoothManager.discoveredPeripherals.sorted {
-                        ($0.rssi ?? Int.min) > ($1.rssi ?? Int.min)
-                    },
+                    bluetoothManager.sortedDevices,
                     id: \.id
                 ) { device in
                     NavigationLink(destination: DeviceLocationView(device: device)) {
@@ -39,8 +36,6 @@ struct HomeView: View {
                         }
                     }
                 }
-                .padding(.top, -30)
-                
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
