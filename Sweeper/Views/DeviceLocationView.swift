@@ -22,6 +22,11 @@ struct DeviceLocationView: View {
     let maxDistance = 4.0
     let minDistance = 0.0
     
+    @State private var animate = true
+    @State private var circleSize: CGFloat = 100 // Main circle size
+    private let triggerSize: CGFloat = 150 // Size at which concentric circles start to appear
+    private let circleCount = 5 // Number of concentric circles
+    
     let generator = UIImpactFeedbackGenerator(style: .heavy)
     
     private func determineSize() -> CGFloat {
@@ -54,23 +59,15 @@ struct DeviceLocationView: View {
         guard let rssi = device.rssi, let lastRssi = device.lastRssi else { return .gray }
         return rssi > lastRssi ? .green : .red
     }
-
+    
     private func calculateFrequency() -> Float {
-        print("distance is", calculateDistance())
-        // Clamp and normalize the value
         let clampedInput = max(min(calculateDistance(), maxDistance), minDistance)
         let normalizedInput = (clampedInput - minDistance) / (maxDistance - minDistance)
-
-        // Apply a logarithmic scale for sensitivity
         let logScale = log10(normalizedInput * 9 + 1)
-
-        // Inverse the logarithmic scale to control frequency
         let pingFrequency = 0.1 + CGFloat(logScale) * (1.5 - 0.1) / log10(10)
-        print("frequency is", Float(max(pingFrequency, 0.1)))
-        // Ensure a minimum frequency to prevent excessively fast feedback
         return Float(max(pingFrequency, 0.1))
     }
-
+    
     
     var body: some View {
         VStack {
@@ -80,12 +77,37 @@ struct DeviceLocationView: View {
             Text(device.peripheral.name ?? "Unknown")
                 .foregroundColor(.white)
                 .font(.title)
-            GeometryReader { geometry in
-                Circle()
-                    .fill(.white.shadow(.drop(color: .black, radius: 3)))
-                    .frame(width: determineSize(), height: determineSize())
-                    .position(x: geometry.size.width / 2 , y: geometry.size.height / 2)
-                    .animation(.easeInOut(duration: 1.0), value: device.rssi)
+            GeometryReader { geo in
+                ZStack {
+                    // Main circle
+                    Circle()
+                        .fill(.white.shadow(.drop(color: .black, radius: 3)))
+                        .frame(width: determineSize(), height: determineSize())
+                        .position(x: geo.size.width / 2 , y: geo.size.height / 2)
+                        .animation(.easeInOut(duration: 1.0), value: device.rssi)
+                        .onAppear {
+                            // Trigger the animation when the view appears
+                            withAnimation(.easeInOut(duration: 2).repeatForever()) {
+                                circleSize = triggerSize
+                            }
+                        }
+                    
+                    // Concentric circles
+                    ForEach(0..<circleCount, id: \.self) { index in
+                        Circle()
+                            .stroke(Color.white.opacity(1 - Double(index) / Double(circleCount)),
+                                    lineWidth: 2)
+                            .frame(width: circleSize + CGFloat(index * 20), height: circleSize + CGFloat(index * 20))
+                            .opacity(animate ? 1 : 0)
+                            .animation(.easeOut(duration: 1).delay(Double(index) * 0.2).repeatForever(autoreverses: false), value: animate)
+                    }
+                }
+                .onChange(of: circleSize) { newSize in
+                    // Start the animation when the circle size changes
+                    if newSize <= triggerSize {
+                        animate = true
+                    }
+                }
             }
             Text("Estimated Distance:")
                 .foregroundColor(.white)
@@ -115,7 +137,7 @@ struct DeviceLocationView: View {
             bluetoothManager.deviceToBeLocated = nil
             
             timer?.invalidate()
-
+            
             guard let uuid = bluetoothManager.lastDeviceLocated?.peripheral.identifier else { return }
             showAlert = bluetoothManager.cachedPeripherals[uuid] == nil
         }
