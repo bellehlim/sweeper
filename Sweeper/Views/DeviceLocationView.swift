@@ -9,6 +9,8 @@ import SwiftUI
 
 struct DeviceLocationView: View {
     @ObservedObject var device: Device
+    @ObservedObject var bluetoothManager: BluetoothManager
+    
     let maxSize = 400.0
     let minSize = 30.0
     let maxDistance = 4.0
@@ -72,5 +74,11 @@ struct DeviceLocationView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(backgroundColor)
+        .onAppear() {
+            bluetoothManager.deviceToBeLocated = device
+        }
+        .onDisappear() {
+            bluetoothManager.deviceToBeLocated = nil
+        }
     }
 }

@@ -7,16 +7,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "6CF81313-C9F6-46A4-9A5B-02748F8DCC87"
+            uuid = "63F81E08-ADD4-4FF4-9F37-916316BD00EB"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Sweeper/BluetoothManager.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "37"
-            endingLineNumber = "37"
-            landmarkName = "init()"
+            startingLineNumber = "85"
+            endingLineNumber = "85"
+            landmarkName = "updateDevice(_:with:advertisementData:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

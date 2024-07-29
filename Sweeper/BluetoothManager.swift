@@ -10,41 +10,47 @@ import CoreLocation
 
 class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
     
+    @Published var sortedDevices: [Device] = []
     @Published var cachedPeripherals = [UUID: Device]() {
         didSet {
             updateSortedDevices()
         }
     }
-    
-    @Published var sortedDevices: [Device] = []
-    
     private func updateSortedDevices() {
         sortedDevices = cachedPeripherals.values.sorted {
             ($0.rssi ?? Int.min) > ($1.rssi ?? Int.min)
         }
     }
+    
     private var centralManager: CBCentralManager!
-    private var scanTimer: Timer?
+    private var scanTimer: Timer!
     
     private var currentScanIndex: Int = 0
+    var deviceToBeLocated: Device?
     
     override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
-        
-        scanTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
-            guard let self else { return }
+        scanTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
             self.scanForPeripherals()
-            currentScanIndex += 1
+            self.currentScanIndex += 1
         }
     }
     
     deinit {
-        scanTimer?.invalidate()
+        scanTimer.invalidate()
     }
     
+    func centralManagerDidUpdateState(_ central: CBCentralManager) { }
     
-    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+    func startScanning() {
+        scanTimer.fire()
+    }
+    
+    func stopScanning() {
+        centralManager.stopScan()
+        scanTimer.invalidate()
     }
     
     private func scanForPeripherals() {
@@ -54,6 +60,11 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
+        if let device = deviceToBeLocated, peripheral.identifier == device.id {
+            device.lastRssi = device.rssi
+            device.rssi = RSSI.intValue
+            return
+        }
         if let device = cachedPeripherals[peripheral.identifier] {
             updateDevice(device, with: RSSI, advertisementData: advertisementData)
         } else {
