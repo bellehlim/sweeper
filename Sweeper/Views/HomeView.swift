@@ -13,6 +13,16 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             VStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.blue) // Adjust the color as needed
+                    .frame(height: 100)
+                    .overlay(
+                        Text("Devices in Range: \(bluetoothManager.discoveredPeripherals.count)")
+                            .foregroundColor(.white)
+                            .font(.headline)
+                            .padding()
+                    )
+                Spacer()
                 List(
                     bluetoothManager.discoveredPeripherals.sorted {
                         ($0.rssi ?? Int.min) > ($1.rssi ?? Int.min)
@@ -21,7 +31,7 @@ struct HomeView: View {
                 ) { device in
                     NavigationLink(destination: DeviceLocationView(device: device)) {
                         HStack {
-                            Text(device.peripheral.name ?? "Unknown")
+                            Text(device.name)
                             Spacer()
                             Text(String(device.rssi ?? 0))
                             Image(systemName: "dot.radiowaves.right")

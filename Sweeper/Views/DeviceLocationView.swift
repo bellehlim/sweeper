@@ -11,18 +11,21 @@ struct DeviceLocationView: View {
     @ObservedObject var device: Device
     let maxSize = 400.0
     let minSize = 30.0
+    let maxDistance = 4.0
+    let minDistance = 0.0
     // TODO: implement haptic feedback
     let generator = UIImpactFeedbackGenerator(style: .soft)
     
     private func determineSize() -> CGFloat {
-        let converted = CGFloat(minSize + (maxSize - minSize) * (calculateDistance() / 30.0))
-        if converted < minSize {
-            return minSize
-        }
-        if converted > maxSize {
-            return maxSize
-        }
-        return converted
+        let clampedInput = max(min(calculateDistance(), maxDistance), minDistance)
+        let normalizedInput = (clampedInput - minDistance) / (maxDistance - minDistance)
+        let clampedNormalizedInput = max(min(normalizedInput, 1), 0)
+
+        // Apply a logarithmic scale to make smaller changes more sensitive at the lower end
+        let logScale = log10(clampedNormalizedInput * 9 + 1)
+
+        let circleWidth = minSize + CGFloat(logScale) * (maxSize - minSize) / log10(10)
+        return circleWidth
     }
     
     private func calculateDistance() -> Double {
@@ -35,7 +38,7 @@ struct DeviceLocationView: View {
         if ratio < 1.0 {
             return pow(ratio, pathLossExponent)
         } else {
-            return (0.89976) * pow(ratio, pathLossExponent)
+            return (0.89976) * pow(ratio, pathLossExponent) // in meteres
         }
     }
     
@@ -65,7 +68,7 @@ struct DeviceLocationView: View {
             Text("Device Name: \(device.peripheral.name ?? "Unknown")")
                 .padding()
                 .foregroundColor(.white)
-            Text("Distance: \(calculateDistance()) m")
+            Text("Estimated Distance: \(String(format: "%.3f", calculateDistance())) m")
                 .foregroundColor(.white)
             Spacer()
         }

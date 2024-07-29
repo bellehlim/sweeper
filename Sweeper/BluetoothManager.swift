@@ -20,7 +20,7 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
         
-        scanTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        scanTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             guard let self else { return }
             self.scanForPeripherals()
         }
@@ -59,7 +59,7 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
     
     private func createDevice(from peripheral: CBPeripheral, RSSI: NSNumber, advertisementData: [String: Any]) -> Device {
         let newDevice = Device(
-            name: peripheral.name,
+            name: peripheral.name ?? String("Unknown \(discoveredPeripherals.count)"),
             rssi: RSSI.intValue,
             lastRssi: RSSI.intValue,
             txPower: advertisementData[CBAdvertisementDataTxPowerLevelKey] as? Int ?? -59,
