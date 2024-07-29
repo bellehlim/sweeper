@@ -49,6 +49,12 @@ struct DeviceLocationView: View {
     
     var body: some View {
         VStack {
+            Text("Device Name:")
+                .foregroundColor(.white)
+                .font(.title2)
+            Text(device.peripheral.name ?? "Unknown")
+                .foregroundColor(.white)
+                .font(.title)
             GeometryReader { geometry in
                 Circle()
                     .fill(.white.shadow(.drop(color: .black, radius: 3)))
@@ -56,20 +62,12 @@ struct DeviceLocationView: View {
                     .position(x: geometry.size.width / 2 , y: geometry.size.height / 2)
                     .animation(.easeInOut(duration: 1.0), value: device.rssi)
             }
-            Spacer()
-            Text("RSSI: \(String(device.rssi ?? 0))")
-                .padding()
+            Text("Estimated Distance:")
                 .foregroundColor(.white)
-            if let txPower = device.txPower {
-                Text("Tx Power: \(String(txPower))")
-                    .padding()
-                    .foregroundColor(.white)
-            }
-            Text("Device Name: \(device.peripheral.name ?? "Unknown")")
-                .padding()
+                .font(.title2)
+            Text("\(String(format: "%.3f", calculateDistance())) m")
                 .foregroundColor(.white)
-            Text("Estimated Distance: \(String(format: "%.3f", calculateDistance())) m")
-                .foregroundColor(.white)
+                .font(.title)
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
