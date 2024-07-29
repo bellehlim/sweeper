@@ -11,16 +11,16 @@ import Foundation
 class Device: ObservableObject {
     var id: UUID = UUID()
     var name: String?
-    @Published var distance: Double?
     @Published var rssi: Int?
     @Published var lastRssi: Int?
+    @Published var txPower: Int?
     @Published var peripheral: CBPeripheral
         
-    init(name: String?, distance: Double?, rssi: Int?, lastRssi: Int?, peripheral: CBPeripheral) {
+    init(name: String?, rssi: Int?, lastRssi: Int?, txPower: Int?, peripheral: CBPeripheral) {
         self.name = name
-        self.distance = distance
         self.rssi = rssi
         self.lastRssi = lastRssi
+        self.txPower = txPower
         self.peripheral = peripheral
     }
 }

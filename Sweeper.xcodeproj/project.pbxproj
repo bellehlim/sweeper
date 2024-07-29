@@ -77,6 +77,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1CB7E4FE2C573D9E008A41F2 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				1CF279082C504E2C00977A26 /* HomeView.swift */,
+				1C01AF8E2C5485F8008F2750 /* DeviceLocationView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		1CF278FA2C504E2C00977A26 = {
 			isa = PBXGroup;
 			children = (
@@ -100,12 +109,11 @@
 		1CF279052C504E2C00977A26 /* Sweeper */ = {
 			isa = PBXGroup;
 			children = (
+				1CB7E4FE2C573D9E008A41F2 /* Views */,
+				1C01AF8C2C507EB8008F2750 /* BluetoothManager.swift */,
 				1CF279062C504E2C00977A26 /* SweeperApp.swift */,
-				1CF279082C504E2C00977A26 /* HomeView.swift */,
 				1CF2790A2C504E2F00977A26 /* Assets.xcassets */,
 				1CF2790C2C504E2F00977A26 /* Preview Content */,
-				1C01AF8C2C507EB8008F2750 /* BluetoothManager.swift */,
-				1C01AF8E2C5485F8008F2750 /* DeviceLocationView.swift */,
 				1C01AF902C548636008F2750 /* Device.swift */,
 			);
 			path = Sweeper;
@@ -439,6 +447,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This is for basic functionality of the app.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This is for basic functionality of the app.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = Needed;
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "This is for basic functionality of the app.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This is important.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -472,6 +481,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This is for basic functionality of the app.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This is for basic functionality of the app.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = Needed;
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "This is for basic functionality of the app.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This is important.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
