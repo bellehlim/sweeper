@@ -8,16 +8,21 @@
 import SwiftUI
 
 struct DeviceLocationView: View {
+    
     @ObservedObject var device: Device
     @ObservedObject var bluetoothManager: BluetoothManager
+    
+    @State private var interval: Float = 0.5
+    @State private var timer: Timer?
+    
     @Binding var showAlert: Bool
     
     let maxSize = 400.0
     let minSize = 30.0
     let maxDistance = 4.0
     let minDistance = 0.0
-    // TODO: implement haptic feedback
-    let generator = UIImpactFeedbackGenerator(style: .soft)
+    
+    let generator = UIImpactFeedbackGenerator(style: .heavy)
     
     private func determineSize() -> CGFloat {
         let clampedInput = max(min(calculateDistance(), maxDistance), minDistance)
@@ -49,12 +54,29 @@ struct DeviceLocationView: View {
         guard let rssi = device.rssi, let lastRssi = device.lastRssi else { return .gray }
         return rssi > lastRssi ? .green : .red
     }
+
+    private func calculateFrequency() -> Float {
+        print("distance is", calculateDistance())
+        // Clamp and normalize the value
+        let clampedInput = max(min(calculateDistance(), maxDistance), minDistance)
+        let normalizedInput = (clampedInput - minDistance) / (maxDistance - minDistance)
+
+        // Apply a logarithmic scale for sensitivity
+        let logScale = log10(normalizedInput * 9 + 1)
+
+        // Inverse the logarithmic scale to control frequency
+        let pingFrequency = 0.1 + CGFloat(logScale) * (1.5 - 0.1) / log10(10)
+        print("frequency is", Float(max(pingFrequency, 0.1)))
+        // Ensure a minimum frequency to prevent excessively fast feedback
+        return Float(max(pingFrequency, 0.1))
+    }
+
     
     var body: some View {
         VStack {
             Text("Device Name:")
                 .foregroundColor(.white)
-                .font(.title2)
+                .font(.headline)
             Text(device.peripheral.name ?? "Unknown")
                 .foregroundColor(.white)
                 .font(.title)
@@ -67,7 +89,7 @@ struct DeviceLocationView: View {
             }
             Text("Estimated Distance:")
                 .foregroundColor(.white)
-                .font(.title2)
+                .font(.headline)
             Text("\(String(format: "%.3f", calculateDistance())) m")
                 .foregroundColor(.white)
                 .font(.title)
@@ -77,10 +99,22 @@ struct DeviceLocationView: View {
         .background(backgroundColor)
         .onAppear() {
             bluetoothManager.deviceToBeLocated = device
+            interval = calculateFrequency()
+            timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(interval), repeats: true) { _ in
+                generator.impactOccurred()
+            }
+        }.onChange(of: device.rssi) { _ in
+            timer?.invalidate()
+            interval = calculateFrequency()
+            timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(interval), repeats: true) { _ in
+                generator.impactOccurred()
+            }
         }
         .onDisappear() {
             bluetoothManager.lastDeviceLocated = device
             bluetoothManager.deviceToBeLocated = nil
+            
+            timer?.invalidate()
 
             guard let uuid = bluetoothManager.lastDeviceLocated?.peripheral.identifier else { return }
             showAlert = bluetoothManager.cachedPeripherals[uuid] == nil
