@@ -12,65 +12,10 @@ struct HomeView: View {
     
     @ObservedObject var bluetoothManager = BluetoothManager()
     @Environment(\.presentationMode) var presentationMode
-    @State private var showDeviceAlert: Bool = false
-    @State private var showCBAlert: Bool = false
+    
     @State private var showTransition: Bool = true
-    
-    private func fillAmount(rssi: Int?) -> Int {
-        guard let rssi else { return 0 }
-        switch rssi {
-        case -50...(-10): return 4 // strong
-        case -70...(-51): return 3
-        case -90...(-71): return 2
-        default: return 1 // weak
-        }
-    }
-    
-    private var shouldShowList: Bool {
-        return bluetoothManager.sortedDevices.count != 0 && bluetoothManager.state == .poweredOn
-    }
-    
-    private var headerView: some View {
-        RoundedRectangle(cornerRadius: 20)
-            .fill(.black)
-            .frame(height: 120)
-            .overlay(
-                VStack {
-                    Text("Welcome to **Sweeper**🧹")
-                        .foregroundStyle(.white)
-                        .font(.title)
-                    if shouldShowList {
-                        Text("Devices in Range: \(bluetoothManager.sortedDevices.count)")
-                            .foregroundColor(.white)
-                            .font(.body)
-                        Text("Tap on a discovered device to locate it")
-                            .foregroundColor(.white)
-                            .font(.body)
-                    }
-                }
-                    .padding(10)
-                    .multilineTextAlignment(.center)
-            )
-            .padding([.top, .leading, .trailing], 20)
-    }
-    
-    private var deviceListView: some View {
-        VStack {
-            List(bluetoothManager.sortedDevices, id: \.id) { device in
-                NavigationLink(destination: DeviceLocationView(device: device,
-                                                               bluetoothManager: bluetoothManager,
-                                                               showAlert: $showDeviceAlert)) {
-                    HStack {
-                        Text(device.name)
-                        Spacer()
-                        Text(String(device.rssi ?? 0))
-                        CustomRadioWaveIcon(fillAmount: fillAmount(rssi: device.rssi))
-                    }
-                }
-            }
-            .scrollContentBackground(.hidden)
-        }
-    }
+    @State private var showCBAlert: Bool = false
+    @State private var showDeviceAlert: Bool = false
     
     var body: some View {
         NavigationView {
@@ -115,6 +60,62 @@ struct HomeView: View {
                 }
             )
         }.accentColor(.white)
+    }
+    
+    private var headerView: some View {
+        RoundedRectangle(cornerRadius: 20)
+            .fill(.black)
+            .frame(height: 120)
+            .overlay(
+                VStack {
+                    Text("Welcome to **Sweeper**🧹")
+                        .foregroundStyle(.white)
+                        .font(.title)
+                    if shouldShowList {
+                        Text("Devices in Range: \(bluetoothManager.sortedDevices.count)")
+                            .foregroundColor(.white)
+                            .font(.body)
+                        Text("Tap on a discovered device to locate it")
+                            .foregroundColor(.white)
+                            .font(.body)
+                    }
+                }
+                    .padding(10)
+                    .multilineTextAlignment(.center)
+            )
+            .padding([.top, .leading, .trailing], 20)
+    }
+    
+    private var shouldShowList: Bool {
+        return bluetoothManager.sortedDevices.count != 0 && bluetoothManager.state == .poweredOn
+    }
+    
+    private var deviceListView: some View {
+        VStack {
+            List(bluetoothManager.sortedDevices, id: \.id) { device in
+                NavigationLink(destination: DeviceLocationView(device: device,
+                                                               bluetoothManager: bluetoothManager,
+                                                               showAlert: $showDeviceAlert)) {
+                    HStack {
+                        Text(device.name)
+                        Spacer()
+                        Text(String(device.rssi ?? 0))
+                        CustomRadioWaveIcon(fillAmount: fillAmount(rssi: device.rssi))
+                    }
+                }
+            }
+            .scrollContentBackground(.hidden)
+        }
+    }
+    
+    private func fillAmount(rssi: Int?) -> Int {
+        guard let rssi else { return 0 }
+        switch rssi {
+        case -50...(-10): return 4 // strong
+        case -70...(-51): return 3
+        case -90...(-71): return 2
+        default: return 1 // weak
+        }
     }
 }
 

@@ -63,18 +63,23 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
+        // only show peripherals with a reasonable RSSI
         guard RSSI.intValue < 0 else { return }
+        
+        // if on the DeviceLocationView, only update the device of interest
         if let device = deviceToBeLocated, peripheral.identifier == device.id {
             device.lastRssi = device.rssi
             device.rssi = RSSI.intValue
             return
         }
+        
         if let device = cachedPeripherals[peripheral.identifier] {
             updateDevice(device, with: RSSI, advertisementData: advertisementData)
         } else {
             let newDevice = createDevice(from: peripheral, RSSI: RSSI, advertisementData: advertisementData)
             cachedPeripherals[peripheral.identifier] = newDevice
         }
+        
         // remove stale peripherals
         for (uuid, device) in cachedPeripherals {
             if device.mostRecentScan + 2 < currentScanIndex {
