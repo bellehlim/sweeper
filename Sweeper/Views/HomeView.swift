@@ -14,7 +14,7 @@ struct HomeView: View {
     @State private var showAlert: Bool = false
     
     private func fillAmount(rssi: Int?) -> Int {
-        guard let rssi = rssi else { return 0 }
+        guard let rssi else { return 0 }
         switch rssi {
         case -50...(-10): return 4 // strong
         case -70...(-51): return 3
@@ -23,43 +23,50 @@ struct HomeView: View {
         }
     }
     
+    private var headerView: some View {
+        RoundedRectangle(cornerRadius: 20)
+            .fill(Color.blue)
+            .frame(height: 100)
+            .overlay(
+                VStack {
+                    Text("Welcome to **Sweeper**🧹")
+                        .foregroundStyle(.white)
+                        .font(.title)
+                    Text("Tap on a discovered device to locate it")
+                        .foregroundColor(.white)
+                        .lineLimit(3)
+                        .font(.body)
+                    Text("Devices in Range: \(bluetoothManager.sortedDevices.count)")
+                        .foregroundColor(.white)
+                        .font(.body)
+                }
+                    .padding(10)
+                    .multilineTextAlignment(.center)
+            )
+            .padding(10)
+    }
+    
+    private var deviceListView: some View {
+        List(bluetoothManager.sortedDevices, id: \.id) { device in
+            NavigationLink(destination: DeviceLocationView(device: device,
+                                                           bluetoothManager: bluetoothManager,
+                                                           showAlert: $showAlert)) {
+                HStack {
+                    Text(device.name)
+                    Spacer()
+                    Text(String(device.rssi ?? 0))
+                    CustomRadioWaveIcon(fillAmount: fillAmount(rssi: device.rssi))
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+    }
+    
     var body: some View {
         NavigationView {
             VStack {
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.blue)
-                    .frame(height: 100)
-                    .overlay(
-                        VStack {
-                            Text("Welcome to **Sweeper**🧹")
-                                .foregroundStyle(.white)
-                                .font(.title)
-                            Text("Tap on a discovered device to locate it")
-                                .foregroundColor(.white)
-                                .lineLimit(3)
-                                .font(.body)
-                            Text("Devices in Range: \(bluetoothManager.sortedDevices.count)")
-                                .foregroundColor(.white)
-                                .font(.body)
-                        }.padding(10)
-                            .multilineTextAlignment(.center)
-                    )
-                    .padding(10)
-                List(
-                    bluetoothManager.sortedDevices,
-                    id: \.id
-                ) { device in
-                    NavigationLink(destination: DeviceLocationView(device: device,
-                                                                   bluetoothManager: bluetoothManager,
-                                                                   showAlert: $showAlert)) {
-                        HStack {
-                            Text(device.name)
-                            Spacer()
-                            Text(String(device.rssi ?? 0))
-                            CustomRadioWaveIcon(fillAmount: fillAmount(rssi: device.rssi))
-                        }
-                    }
-                }.scrollContentBackground(.hidden)
+                headerView
+                deviceListView
             }
         }.onAppear {
             // first scan
