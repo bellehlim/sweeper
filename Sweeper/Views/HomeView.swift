@@ -12,7 +12,17 @@ struct HomeView: View {
     @ObservedObject var bluetoothManager = BluetoothManager()
     @Environment(\.presentationMode) var presentationMode
     @State private var showAlert: Bool = false
- 
+    
+    private func fillAmount(rssi: Int?) -> Int {
+        guard let rssi = rssi else { return 0 }
+        switch rssi {
+        case -50...(-10): return 4 // strong
+        case -70...(-51): return 3
+        case -90...(-71): return 2
+        default: return 1 // weak
+        }
+    }
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -46,18 +56,18 @@ struct HomeView: View {
                             Text(device.name)
                             Spacer()
                             Text(String(device.rssi ?? 0))
-                            CustomRadioWaveIcon()
+                            CustomRadioWaveIcon(fillAmount: fillAmount(rssi: device.rssi))
                         }
                     }
-                }.backgroundStyle(.blue)
+                }.scrollContentBackground(.hidden)
             }
         }.onAppear {
             // first scan
             bluetoothManager.startScanning()
         }.alert(isPresented: $showAlert) {
             Alert(
-                title: Text("Device No Longer in Range"),
-                message: Text("\(bluetoothManager.lastDeviceLocated?.name ?? "The device you were viewing") is no longer in range."),
+                title: Text("Error Scanning Device"),
+                message: Text("\(bluetoothManager.lastDeviceLocated?.name ?? "The device you were viewing") could not be scanned."),
                 dismissButton: .default(Text("OK")) {
                     presentationMode.wrappedValue.dismiss()
                 }
@@ -68,34 +78,24 @@ struct HomeView: View {
 
 
 struct CustomRadioWaveIcon: View {
-    var band1Opacity: Double = 0.30
-    var band2Opacity: Double = 0.70
-    var band3Opacity: Double = 1.00
-    let size = 20.0 // 50
+    var fillAmount: Int
+    let size: CGFloat = 20.0
+    
+    private func opacity(for index: Int) -> Double {
+        print(fillAmount > index ? 1.0 : 0.2)
+        return fillAmount > index ? 1.0 : 0.2
+    }
     
     var body: some View {
         ZStack {
-            // right-most band
+            // base
             Image(systemName: "dot.radiowaves.right")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: size, height: size)
-                .foregroundColor(.black) // Base color of the icon
-            
-            .opacity(0.2)
-            
-            Image(systemName: "dot.radiowaves.right")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size, height: size)
-                .mask(
-                    Circle()
-                        .frame(width: size, height: size)
-                        .offset(x: -5)// Size of the cropped area
-                )
+                .foregroundColor(.black)
                 .opacity(0.2)
-            
-            
+            // actual fill
             Image(systemName: "dot.radiowaves.right")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
@@ -103,19 +103,7 @@ struct CustomRadioWaveIcon: View {
                 .mask(
                     Circle()
                         .frame(width: size, height: size)
-                        .offset(x: -10)// Size of the cropped area
-                )
-                .opacity(0.5)
-            
-            // left-most band
-            Image(systemName: "dot.radiowaves.right")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size, height: size)
-                .mask(
-                    Circle()
-                        .frame(width: size, height: size)
-                        .offset(x: -12)// Size of the cropped area
+                        .offset(x: CGFloat(-5 * (-fillAmount + 4)))
                 )
         }
     }

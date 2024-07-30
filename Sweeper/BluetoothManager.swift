@@ -25,7 +25,7 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
     private var centralManager: CBCentralManager!
     private var scanTimer: Timer!
     
-    private var currentScanIndex: Int = 0
+    private(set) var currentScanIndex: Int = 0
     var lastDeviceLocated: Device?
     var deviceToBeLocated: Device?
     
@@ -61,6 +61,7 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
+        guard RSSI.intValue < 0 else { return }
         if let device = deviceToBeLocated, peripheral.identifier == device.id {
             device.lastRssi = device.rssi
             device.rssi = RSSI.intValue
