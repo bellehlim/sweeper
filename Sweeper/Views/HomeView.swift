@@ -6,12 +6,15 @@
 //
 
 import SwiftUI
+import CoreBluetooth
 
 struct HomeView: View {
     
     @ObservedObject var bluetoothManager = BluetoothManager()
     @Environment(\.presentationMode) var presentationMode
-    @State private var showAlert: Bool = false
+    @State private var showDeviceAlert: Bool = false
+    @State private var showCBAlert: Bool = false
+    @State private var showTransition: Bool = true
     
     private func fillAmount(rssi: Int?) -> Int {
         guard let rssi else { return 0 }
@@ -23,55 +26,71 @@ struct HomeView: View {
         }
     }
     
+    private var shouldShowList: Bool {
+        return bluetoothManager.sortedDevices.count != 0 && bluetoothManager.state == .poweredOn
+    }
+    
     private var headerView: some View {
         RoundedRectangle(cornerRadius: 20)
-            .fill(Color.blue)
-            .frame(height: 100)
+            .fill(.black)
+            .frame(height: 120)
             .overlay(
                 VStack {
                     Text("Welcome to **Sweeper**🧹")
                         .foregroundStyle(.white)
                         .font(.title)
-                    Text("Tap on a discovered device to locate it")
-                        .foregroundColor(.white)
-                        .lineLimit(3)
-                        .font(.body)
-                    Text("Devices in Range: \(bluetoothManager.sortedDevices.count)")
-                        .foregroundColor(.white)
-                        .font(.body)
+                    if shouldShowList {
+                        Text("Devices in Range: \(bluetoothManager.sortedDevices.count)")
+                            .foregroundColor(.white)
+                            .font(.body)
+                        Text("Tap on a discovered device to locate it")
+                            .foregroundColor(.white)
+                            .font(.body)
+                    }
                 }
                     .padding(10)
                     .multilineTextAlignment(.center)
             )
-            .padding(10)
+            .padding([.top, .leading, .trailing], 20)
     }
     
     private var deviceListView: some View {
-        List(bluetoothManager.sortedDevices, id: \.id) { device in
-            NavigationLink(destination: DeviceLocationView(device: device,
-                                                           bluetoothManager: bluetoothManager,
-                                                           showAlert: $showAlert)) {
-                HStack {
-                    Text(device.name)
-                    Spacer()
-                    Text(String(device.rssi ?? 0))
-                    CustomRadioWaveIcon(fillAmount: fillAmount(rssi: device.rssi))
+        VStack {
+            List(bluetoothManager.sortedDevices, id: \.id) { device in
+                NavigationLink(destination: DeviceLocationView(device: device,
+                                                               bluetoothManager: bluetoothManager,
+                                                               showAlert: $showDeviceAlert)) {
+                    HStack {
+                        Text(device.name)
+                        Spacer()
+                        Text(String(device.rssi ?? 0))
+                        CustomRadioWaveIcon(fillAmount: fillAmount(rssi: device.rssi))
+                    }
                 }
             }
+            .scrollContentBackground(.hidden)
         }
-        .scrollContentBackground(.hidden)
     }
     
     var body: some View {
         NavigationView {
             VStack {
                 headerView
-                deviceListView
+                if shouldShowList {
+                    deviceListView
+                        .transition(showTransition ? .move(edge: .bottom) : .identity) // Slide in from the top or no transition
+                        .transaction { transaction in
+                            transaction.animation = showTransition ? .easeInOut(duration: 0.3) : nil
+                        }
+                } else {
+                    ProgressView().progressViewStyle(.circular)
+                        .padding(10)
+                }
             }
         }.onAppear {
             // first scan
             bluetoothManager.startScanning()
-        }.alert(isPresented: $showAlert) {
+        }.alert(isPresented: $showDeviceAlert) {
             Alert(
                 title: Text("Error Scanning Device"),
                 message: Text("\(bluetoothManager.lastDeviceLocated?.name ?? "The device you were viewing") could not be scanned."),
@@ -79,7 +98,23 @@ struct HomeView: View {
                     presentationMode.wrappedValue.dismiss()
                 }
             )
-        }
+        }.onChange(of: bluetoothManager.sortedDevices.count) { newCount in
+            if newCount > 0 && showTransition {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.3) {
+                    showTransition = false
+                }
+            }
+        }.onChange(of: bluetoothManager.state) { state in
+            showCBAlert = state != .poweredOn
+        }.alert(isPresented: $showCBAlert) {
+            Alert(
+                title: Text("Bluetooth Error"),
+                message: Text("Please check your Bluetooth is on."),
+                dismissButton: .default(Text("OK")) {
+                    presentationMode.wrappedValue.dismiss()
+                }
+            )
+        }.accentColor(.white)
     }
 }
 

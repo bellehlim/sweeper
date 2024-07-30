@@ -10,6 +10,7 @@ import CoreLocation
 
 class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
     
+    @Published var state: CBManagerState?
     @Published var sortedDevices: [Device] = []
     @Published var cachedPeripherals = [UUID: Device]() {
         didSet {
@@ -24,7 +25,6 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
     
     private var centralManager: CBCentralManager!
     private var scanTimer: Timer!
-    
     private(set) var currentScanIndex: Int = 0
     var lastDeviceLocated: Device?
     var deviceToBeLocated: Device?
@@ -43,7 +43,9 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
         scanTimer.invalidate()
     }
     
-    func centralManagerDidUpdateState(_ central: CBCentralManager) { }
+    func centralManagerDidUpdateState(_ central: CBCentralManager) { 
+        state = central.state
+    }
     
     func startScanning() {
         scanTimer.fire()
