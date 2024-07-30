@@ -82,7 +82,7 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, ObservableObject {
         
         // remove stale peripherals
         for (uuid, device) in cachedPeripherals {
-            if device.mostRecentScan + 2 < currentScanIndex {
+            if device.mostRecentScan + 1 < currentScanIndex {
                 cachedPeripherals.removeValue(forKey: uuid)
             }
         }

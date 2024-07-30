@@ -35,15 +35,8 @@ struct HomeView: View {
         }.onAppear {
             // first scan
             bluetoothManager.startScanning()
-        }.alert(isPresented: $showDeviceAlert) {
-            Alert(
-                title: Text("Error Scanning Device"),
-                message: Text("\(bluetoothManager.lastDeviceLocated?.name ?? "The device you were viewing") could not be scanned."),
-                dismissButton: .default(Text("OK")) {
-                    presentationMode.wrappedValue.dismiss()
-                }
-            )
         }.onChange(of: bluetoothManager.sortedDevices.count) { newCount in
+            // only show the transition one time at startup
             if newCount > 0 && showTransition {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3.3) {
                     showTransition = false
@@ -51,10 +44,10 @@ struct HomeView: View {
             }
         }.onChange(of: bluetoothManager.state) { state in
             showCBAlert = state != .poweredOn
-        }.alert(isPresented: $showCBAlert) {
+        }.alert(isPresented: $showDeviceAlert) {
             Alert(
-                title: Text("Bluetooth Error"),
-                message: Text("Please check your Bluetooth is on."),
+                title: Text("Error Scanning Device"),
+                message: Text("\(bluetoothManager.lastDeviceLocated?.name ?? "The device you were viewing") could not be scanned."),
                 dismissButton: .default(Text("OK")) {
                     presentationMode.wrappedValue.dismiss()
                 }
@@ -80,10 +73,19 @@ struct HomeView: View {
                             .font(.body)
                     }
                 }
-                    .padding(10)
-                    .multilineTextAlignment(.center)
+                .padding(10)
+                .multilineTextAlignment(.center)
             )
             .padding([.top, .leading, .trailing], 20)
+            .alert(isPresented: $showCBAlert) {
+                Alert(
+                    title: Text("Bluetooth Error"),
+                    message: Text("Sweeper needs to use Bluetooth. Please check your Bluetooth is on."),
+                    dismissButton: .default(Text("OK")) {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                )
+            }
     }
     
     private var shouldShowList: Bool {
@@ -95,7 +97,8 @@ struct HomeView: View {
             List(bluetoothManager.sortedDevices, id: \.id) { device in
                 NavigationLink(destination: DeviceLocationView(device: device,
                                                                bluetoothManager: bluetoothManager,
-                                                               showAlert: $showDeviceAlert)) {
+                                                               showDeviceAlert: $showDeviceAlert,
+                                                               showCBAlert: $showCBAlert)) {
                     HStack {
                         Text(device.name)
                         Spacer()

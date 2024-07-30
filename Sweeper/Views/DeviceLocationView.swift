@@ -12,7 +12,8 @@ struct DeviceLocationView: View {
     @ObservedObject var device: Device
     @ObservedObject var bluetoothManager: BluetoothManager
     
-    @Binding var showAlert: Bool
+    @Binding var showDeviceAlert: Bool
+    @Binding var showCBAlert: Bool
     
     @State private var interval: Float = 0.5
     @State private var timer: Timer?
@@ -135,7 +136,7 @@ struct DeviceLocationView: View {
             bluetoothManager.lastDeviceLocated = device
             bluetoothManager.deviceToBeLocated = nil
             if let uuid = bluetoothManager.lastDeviceLocated?.peripheral.identifier {
-                showAlert = bluetoothManager.cachedPeripherals[uuid] == nil
+                showDeviceAlert = bluetoothManager.cachedPeripherals[uuid] == nil
                 || bluetoothManager.lastDeviceLocated?.mostRecentScan != bluetoothManager.currentScanIndex
             }
             
