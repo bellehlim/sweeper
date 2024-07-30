@@ -44,7 +44,7 @@ struct DeviceLocationView: View {
     /// for display values
     private var scaledDistance: CGFloat {
         let maxDistance = 4.0
-        let minDistance = 0.0
+        let minDistance = 0.2 // closest reasonable distance
         let clampedInput = max(min(distance, maxDistance), minDistance)
         let normalizedInput = (clampedInput - minDistance) / (maxDistance - minDistance)
         return log10(normalizedInput * 9 + 1)
