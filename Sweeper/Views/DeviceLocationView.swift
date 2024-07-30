@@ -34,8 +34,7 @@ struct DeviceLocationView: View {
         
         let pathLossExponent: Double = 2.0 // typical value for indoor environments
         
-        // found txPowers tend to be large and positive, causing very off distance calculations -- just using -59 default for now
-        let ratio = Double(rssi) / Double(-59)
+        let ratio = Double(rssi) / Double(txPower)
         if ratio < 1.0 {
             return pow(ratio, pathLossExponent)
         } else {
