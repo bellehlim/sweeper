@@ -47,7 +47,7 @@ struct HomeView: View {
         }.alert(isPresented: $showDeviceAlert) {
             Alert(
                 title: Text("Error Scanning Device"),
-                message: Text("\(bluetoothManager.lastDeviceLocated?.name ?? "The device you were viewing") could not be scanned."),
+                message: Text("\(bluetoothManager.lastDeviceLocated?.name ?? "The device you were viewing") could not be scanned. Try again."),
                 dismissButton: .default(Text("OK")) {
                     presentationMode.wrappedValue.dismiss()
                 }

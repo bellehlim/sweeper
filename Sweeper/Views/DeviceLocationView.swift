@@ -22,18 +22,19 @@ struct DeviceLocationView: View {
     let generator = UIImpactFeedbackGenerator(style: .heavy)
     
     @State private var animate = true
-    @State private var circleSize: CGFloat = 50 // Main circle size
-    private let triggerSize: CGFloat = 100 // Size at which concentric circles start to appear
-    private let circleCount = 5 // Number of concentric circles
+    @State private var circleSize: CGFloat = 50
+    
+    private let triggerDistance = 0.4
+    private let circleCount = 8
     
     // from: https://stackoverflow.com/questions/20416218/understanding-ibeacon-distancing/20434019#20434019
     private var distance: Double {
         guard let rssi = device.rssi, let txPower = device.txPower else { return 0.0 }
         if rssi == 0 { return -1.0 }
         
-        let pathLossExponent: Double = 2.0 // Typical value for indoor environments
+        let pathLossExponent: Double = 2.0 // typical value for indoor environments
         
-        // found txPowers tend to be large and positive, causing very off distance calculations -- just use -59 for now
+        // found txPowers tend to be large and positive, causing very off distance calculations -- just using -59 default for now
         let ratio = Double(rssi) / Double(-59)
         if ratio < 1.0 {
             return pow(ratio, pathLossExponent)
@@ -66,7 +67,7 @@ struct DeviceLocationView: View {
     
     private var backgroundColor: Color {
         guard let rssi = device.rssi, let lastRssi = device.lastRssi else { return .gray }
-        guard distance > 0.35 else { return .green }
+        guard distance > triggerDistance else { return .green }
         return rssi > lastRssi ? Color.green : Color.red
     }
     
@@ -79,7 +80,7 @@ struct DeviceLocationView: View {
     
     private func startAnimation() {
         withAnimation(.easeInOut(duration: 2).repeatForever()) {
-            circleSize = triggerSize
+            circleSize = 100
         }
     }
     
@@ -107,7 +108,7 @@ struct DeviceLocationView: View {
                             .stroke(.white.opacity(1 - Double(index) / Double(circleCount)),
                                     lineWidth: 2)
                             .frame(width: circleSize + CGFloat(index * 20), height: circleSize + CGFloat(index * 20))
-                            .opacity(distance <= 0.3 ? 1 : 0)
+                            .opacity(distance <= triggerDistance ? 1 : 0)
                             .animation(.easeOut.repeatForever(autoreverses: false), value: animate)
                     }
                 }
