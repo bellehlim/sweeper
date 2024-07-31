@@ -34,7 +34,7 @@ struct DeviceLocationView: View {
         
         let pathLossExponent: Double = 2.0 // typical value for indoor environments
         
-        let ratio = Double(rssi) / Double(txPower)
+        let ratio = Double(rssi) / Double(-59) // or replace this with -59, some Tx Powers seem unreliable
         if ratio < 1.0 {
             return pow(ratio, pathLossExponent)
         } else {
